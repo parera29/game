@@ -60,7 +60,7 @@ function buildComposer() {
   const rt = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: SETTINGS.quality >= 1 ? 4 : 0 });
   composer = new EffectComposer(renderer, rt);
   renderPass = new RenderPass(new THREE.Scene(), camera);
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.55, 0.5, 0.82);
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.45, 0.5, 0.9);
   finalPass = new ShaderPass(FinalShader);
   composer.addPass(renderPass); if (SETTINGS.quality >= 1) composer.addPass(bloomPass); composer.addPass(new OutputPass()); composer.addPass(finalPass);
   composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(innerWidth, innerHeight);

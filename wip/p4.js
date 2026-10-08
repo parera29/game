@@ -282,9 +282,9 @@ function animateModel(A, dt, st = {}) {
     J.legL.rotation.x = lerp(J.legL.rotation.x, -0.2, k); J.legR.rotation.x = lerp(J.legR.rotation.x, 0.3, k);
   } else if (pose === 'scare') {
     const s = st.shake || 1, n = (f) => Math.sin(A.t * f) * Math.sin(A.t * f * 0.37);
-    J.armL.rotation.x = lerp(J.armL.rotation.x, -1.55 + n(31) * 0.2 * s, k * 2); J.armR.rotation.x = lerp(J.armR.rotation.x, -1.45 + n(27) * 0.2 * s, k * 2);
-    J.armL.rotation.z = lerp(J.armL.rotation.z, 0.35, k); J.armR.rotation.z = lerp(J.armR.rotation.z, -0.35, k);
-    J.elbowL.rotation.x = lerp(J.elbowL.rotation.x, -0.5, k); J.elbowR.rotation.x = lerp(J.elbowR.rotation.x, -0.6, k);
+    J.armL.rotation.x = lerp(J.armL.rotation.x, -1.1 + n(31) * 0.2 * s, k * 2); J.armR.rotation.x = lerp(J.armR.rotation.x, -1.0 + n(27) * 0.2 * s, k * 2);
+    J.armL.rotation.z = lerp(J.armL.rotation.z, 1.0, k); J.armR.rotation.z = lerp(J.armR.rotation.z, -1.0, k);
+    J.elbowL.rotation.x = lerp(J.elbowL.rotation.x, -0.9, k); J.elbowR.rotation.x = lerp(J.elbowR.rotation.x, -1.0, k);
     J.head.rotation.x = -0.15 + n(43) * 0.12 * s; J.head.rotation.z = (st.tilt || 0) + n(37) * 0.18 * s; J.neck.rotation.y = n(29) * 0.15 * s;
     J.spine.rotation.x = lerp(J.spine.rotation.x, 0.3, k);
   }
