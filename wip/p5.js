@@ -159,9 +159,9 @@ const F = {
   bulb(x, y, z) { const g = new THREE.Group(); part(g, new THREE.CylinderGeometry(0.004, 0.004, 0.5, 4), M.black, 0, -0.25, 0); part(g, new THREE.SphereGeometry(0.05, 10, 8), M.bulbOff, 0, -0.55, 0); g.position.set(x, y, z); W.scene.add(g); g.userData.dynamic = true; W.updaters.push((dt, t) => { g.rotation.z = Math.sin(t * 0.8 + x) * 0.05; g.rotation.x = Math.cos(t * 0.6 + z) * 0.04; }); return g; },
   headPile(x, z, n = 4) {
     const g = new THREE.Group(); const fur = [furMaterial('furBear'), furMaterial('furRabbit'), furMaterial('furFox'), furMaterial('furChick')];
-    for (let i = 0; i < n; i++) { const hm = new THREE.Mesh(lumpy(new THREE.SphereGeometry(0.22, 14, 10), 0.03, 7, i), fur[i % 4]); hm.position.set(rand(-0.4, 0.4), 0.2 + (i > 2 ? 0.3 : 0), rand(-0.4, 0.4)); hm.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3)); g.add(hm); for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: 0xbbb39a, roughness: 0.2 })); e.position.set(s * 0.08, 0.05, 0.19); hm.add(e); } }
+    for (let i = 0; i < n; i++) { const sp = n > 3 ? 0.4 : 0.18; const hm = new THREE.Mesh(lumpy(new THREE.SphereGeometry(0.22, 14, 10), 0.03, 7, i), fur[i % 4]); hm.position.set(rand(-sp, sp), 0.2 + (i > 2 ? 0.3 : 0), rand(-sp, sp)); hm.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3)); g.add(hm); for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: 0xbbb39a, roughness: 0.2 })); e.position.set(s * 0.08, 0.05, 0.19); hm.add(e); } }
     g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    return place(g, x, z, 0, 1.0, 1.0, 0.8);
+    return place(g, x, z, 0, n > 3 ? 1.0 : 0.6, n > 3 ? 1.0 : 0.6, 0.8);
   },
 };
 

@@ -497,7 +497,7 @@ async function startLevel(idx) {
   PLAYER.reset({ pos: V3(), yaw: 0 });
   LV.build();
   mergeStatic(W.scene);
-  W.nav = idx < 3 ? new NavGrid(W.bounds, idx === 1 ? 0.5 : 0.4) : null;
+  W.nav = idx < 3 ? new NavGrid(W.bounds, idx === 0 ? 0.25 : idx === 1 ? 0.5 : 0.4, idx === 0 ? 0.24 : 0.34) : null;
   if (idx !== 1) W.rain = makeRain(W.scene, SETTINGS.quality >= 2 ? 7000 : 3500, 40, W.rainExclude);
   PLAYER.reset(W.spawn);
   camera.position.set(PLAYER.pos.x, PLAYER.h, PLAYER.pos.z); camera.rotation.set(0, PLAYER.yaw, 0); camera.fov = SETTINGS.fov; camera.updateProjectionMatrix();

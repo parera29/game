@@ -248,7 +248,8 @@ class NavGrid {
     const j0 = Math.max(0, Math.floor((z0 - this.b.minZ) / this.cell)), j1 = Math.min(this.nz - 1, Math.floor((z1 - this.b.minZ) / this.cell));
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       const cx = this.b.minX + (i + 0.5) * this.cell, cz = this.b.minZ + (j + 0.5) * this.cell;
-      if (v === 1 && (cx < x0 - this.cell * 0.5 || cx > x1 + this.cell * 0.5 || cz < z0 - this.cell * 0.5 || cz > z1 + this.cell * 0.5)) continue;
+      const sl = v === 1 ? this.cell * 0.5 : 0;
+      if (cx < x0 - sl || cx > x1 + sl || cz < z0 - sl || cz > z1 + sl) continue;
       arr[j * this.nx + i] = v;
     }
   }

@@ -62,6 +62,13 @@ button{font-family:inherit}
 .mbtn.play{color:#f1ebdf;font-size:clamp(24px,2.6vw,34px);font-weight:600}
 .mbtn.play:hover{color:var(--red2)}
 #menuFoot{position:absolute;right:3vw;bottom:3vh;font-family:'VT323';color:#4a453e;font-size:18px;letter-spacing:.15em;text-align:right}
+@media (max-height:760px){
+  #title .t2{font-size:clamp(30px,4.4vw,60px)} #title .t1{font-size:16px} #title .t3{font-size:18px;margin-top:.2em}
+  #levelList{margin-top:2.5vh} .lvl{padding:3px 0;font-size:18px} #lvlInfo{margin-top:8px;font-size:12.5px;min-height:0}
+  .mbtn{padding:3px 0;font-size:16px} .mbtn.play{font-size:22px} #menuLeft{top:5vh;bottom:4vh}
+}
+@media (max-height:560px){ .lvl .sub{display:none} #lvlInfo{display:none} }
+#menuLeft{overflow-y:auto;scrollbar-width:none}
 #animName{position:absolute;right:6vw;top:10vh;text-align:right;pointer-events:none}
 #animName .n{font-family:'Special Elite';font-size:clamp(26px,3.4vw,50px);color:#d8d0c2;letter-spacing:.15em;text-shadow:0 0 18px #000}
 #animName .s{font-family:'VT323';font-size:20px;color:#8e2a20;letter-spacing:.3em}

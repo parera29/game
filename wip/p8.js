@@ -26,12 +26,13 @@ function buildMenuScene() {
   F.cobweb(-2.9, 2.6, -1.9, Math.PI / 4, 0.9); F.cobweb(1.3, 2.6, -5.9, -Math.PI / 4, 0.7);
   F.boxes(-2.4, 4.6, 3, 0.6); F.bookshelf(-1.0, -5.75, 0, 1.2, 2.0); F.chair(-2.3, 0.0, 0.9, true);
   // bombilla que cuelga sobre el animatrónico
-  const bulb = new THREE.Group(); bulb.position.set(0, H, -3.0); sc.add(bulb); bulb.userData.dynamic = true;
+  const bulb = new THREE.Group(); bulb.position.set(0, H, -2.25); sc.add(bulb); bulb.userData.dynamic = true;
   part(bulb, new THREE.CylinderGeometry(0.004, 0.004, 0.6, 4), M.black, 0, -0.3, 0);
   const bm = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffc070, emissiveIntensity: 2 }); part(bulb, new THREE.SphereGeometry(0.05, 10, 8), bm, 0, -0.64, 0);
-  const bl = new THREE.PointLight(0xffb060, 4, 6, 1.6); bl.position.y = -0.7; bl.castShadow = true; bl.shadow.mapSize.set(512, 512); bl.shadow.bias = -0.002; bulb.add(bl);
+  const bl = new THREE.PointLight(0xffb060, 7, 7, 1.5); bl.position.y = -0.7; bl.castShadow = true; bl.shadow.mapSize.set(512, 512); bl.shadow.bias = -0.002; bulb.add(bl);
   MENU.bulb = { g: bulb, l: bl, m: bm, off: 0 };
-  const fill = new THREE.PointLight(0x5a6a9a, 0.6, 8, 2); fill.position.set(0, 1.8, 3.5); sc.add(fill);
+  const fill = new THREE.PointLight(0x5a6a9a, 0.9, 8, 2); fill.position.set(0, 1.8, 3.5); sc.add(fill);
+  const rim = new THREE.PointLight(0xff3020, 2.5, 5, 2); rim.position.set(0, 1.2, -5.2); sc.add(rim);
   for (const k of ['bear', 'rabbit', 'fox', 'chick']) { const A = buildAnimatronic(k); A.root.position.set(0, 0, -2.9); A.root.visible = false; sc.add(A.root); MENU.models[k] = A; }
   sc.add(camera);
   mergeStatic(sc);
@@ -51,8 +52,8 @@ function updateMenu(dt) {
   W.updaters.forEach((f) => f(dt, U_TIME.value));
   if (MENU.swapT > 0) { MENU.swapT -= dt; if (MENU.swapT <= 0 && MENU.pending) { showMenuModel(MENU.pending); MENU.pending = null; } }
   const B = MENU.bulb; B.g.rotation.z = Math.sin(U_TIME.value * 0.7) * 0.06; B.g.rotation.x = Math.cos(U_TIME.value * 0.5) * 0.04;
-  let f = 1; if (B.off > 0) { B.off -= dt; f = 0; } else if (Math.random() < 0.015) B.off = rand(0.05, 0.25); else f = 0.9 + Math.random() * 0.1;
-  B.l.intensity = 4 * f; B.m.emissiveIntensity = 2 * f;
+  let f = 1; if (B.off > 0) { B.off -= dt; f = 0; } else if (Math.random() < dt * 0.4) B.off = rand(0.05, 0.2); else f = 0.9 + Math.random() * 0.1;
+  B.l.intensity = 7 * f; B.m.emissiveIntensity = 2 * f;
   if (MENU.cur) {
     const A = MENU.cur; A.root.position.z = -2.9 + Math.sin(U_TIME.value * 0.3) * 0.03;
     animateModel(A, dt, { speed: 0, pose: 'idle', look: camera.position, eyeI: f > 0 ? 4 : 6, glow: f > 0 ? 0.6 : 1, servo: () => Math.random() < 0.3 && AUD.servo(null, 0.03, 0.4) });

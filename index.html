@@ -62,6 +62,13 @@ button{font-family:inherit}
 .mbtn.play{color:#f1ebdf;font-size:clamp(24px,2.6vw,34px);font-weight:600}
 .mbtn.play:hover{color:var(--red2)}
 #menuFoot{position:absolute;right:3vw;bottom:3vh;font-family:'VT323';color:#4a453e;font-size:18px;letter-spacing:.15em;text-align:right}
+@media (max-height:760px){
+  #title .t2{font-size:clamp(30px,4.4vw,60px)} #title .t1{font-size:16px} #title .t3{font-size:18px;margin-top:.2em}
+  #levelList{margin-top:2.5vh} .lvl{padding:3px 0;font-size:18px} #lvlInfo{margin-top:8px;font-size:12.5px;min-height:0}
+  .mbtn{padding:3px 0;font-size:16px} .mbtn.play{font-size:22px} #menuLeft{top:5vh;bottom:4vh}
+}
+@media (max-height:560px){ .lvl .sub{display:none} #lvlInfo{display:none} }
+#menuLeft{overflow-y:auto;scrollbar-width:none}
 #animName{position:absolute;right:6vw;top:10vh;text-align:right;pointer-events:none}
 #animName .n{font-family:'Special Elite';font-size:clamp(26px,3.4vw,50px);color:#d8d0c2;letter-spacing:.15em;text-shadow:0 0 18px #000}
 #animName .s{font-family:'VT323';font-size:20px;color:#8e2a20;letter-spacing:.3em}
@@ -1282,7 +1289,8 @@ class NavGrid {
     const j0 = Math.max(0, Math.floor((z0 - this.b.minZ) / this.cell)), j1 = Math.min(this.nz - 1, Math.floor((z1 - this.b.minZ) / this.cell));
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       const cx = this.b.minX + (i + 0.5) * this.cell, cz = this.b.minZ + (j + 0.5) * this.cell;
-      if (v === 1 && (cx < x0 - this.cell * 0.5 || cx > x1 + this.cell * 0.5 || cz < z0 - this.cell * 0.5 || cz > z1 + this.cell * 0.5)) continue;
+      const sl = v === 1 ? this.cell * 0.5 : 0;
+      if (cx < x0 - sl || cx > x1 + sl || cz < z0 - sl || cz > z1 + sl) continue;
       arr[j * this.nx + i] = v;
     }
   }
@@ -2027,9 +2035,9 @@ const F = {
   bulb(x, y, z) { const g = new THREE.Group(); part(g, new THREE.CylinderGeometry(0.004, 0.004, 0.5, 4), M.black, 0, -0.25, 0); part(g, new THREE.SphereGeometry(0.05, 10, 8), M.bulbOff, 0, -0.55, 0); g.position.set(x, y, z); W.scene.add(g); g.userData.dynamic = true; W.updaters.push((dt, t) => { g.rotation.z = Math.sin(t * 0.8 + x) * 0.05; g.rotation.x = Math.cos(t * 0.6 + z) * 0.04; }); return g; },
   headPile(x, z, n = 4) {
     const g = new THREE.Group(); const fur = [furMaterial('furBear'), furMaterial('furRabbit'), furMaterial('furFox'), furMaterial('furChick')];
-    for (let i = 0; i < n; i++) { const hm = new THREE.Mesh(lumpy(new THREE.SphereGeometry(0.22, 14, 10), 0.03, 7, i), fur[i % 4]); hm.position.set(rand(-0.4, 0.4), 0.2 + (i > 2 ? 0.3 : 0), rand(-0.4, 0.4)); hm.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3)); g.add(hm); for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: 0xbbb39a, roughness: 0.2 })); e.position.set(s * 0.08, 0.05, 0.19); hm.add(e); } }
+    for (let i = 0; i < n; i++) { const sp = n > 3 ? 0.4 : 0.18; const hm = new THREE.Mesh(lumpy(new THREE.SphereGeometry(0.22, 14, 10), 0.03, 7, i), fur[i % 4]); hm.position.set(rand(-sp, sp), 0.2 + (i > 2 ? 0.3 : 0), rand(-sp, sp)); hm.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3)); g.add(hm); for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: 0xbbb39a, roughness: 0.2 })); e.position.set(s * 0.08, 0.05, 0.19); hm.add(e); } }
     g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    return place(g, x, z, 0, 1.0, 1.0, 0.8);
+    return place(g, x, z, 0, n > 3 ? 1.0 : 0.6, n > 3 ? 1.0 : 0.6, 0.8);
   },
 };
 
@@ -2167,10 +2175,8 @@ function buildHouse() {
   const fdoor = box(1.0, 2.15, 0.06, M.door, 8, 0, 0.0, { col: true, uvs: 0 }); fdoor.geometry.attributes.uv.needsUpdate = true; fdoor.userData.dynamic = true;
   addInteract(fdoor, 'Abrir puerta principal', () => { AUD.burst({ type: 'brown', f: 300, dur: 0.2, vol: 0.6 }); subtitle('Está cerrada con llave. No puedo irme sin sus recuerdos.'); });
   // --- SALÓN ---
-  F.rug && 0;
-  const rug = floorPlane(2.6, 1.6, 5.6, 4.0, M.rug, 0.006, 3); rug.receiveShadow = true;
-  F.tv(4.6, 0.45, 0); W.tv = W.scene.children[W.scene.children.length - 1];
-  W.tvObj = F_last_tv;
+    const rug = floorPlane(2.6, 1.6, 5.6, 4.0, M.rug, 0.006, 3); rug.receiveShadow = true;
+  F.tv(4.6, 0.45, 0);
   F.sofa(4.0, 4.3, Math.PI); F.table(4.0, 2.75, 0, 1.1, 0.6, 0.42);
   const fp = F.fireplace(0.32, 2.4, Math.PI / 2); W.fireEm = fp.em;
   const fireL = new THREE.PointLight(0xff5a18, 1.2, 4, 2); fireL.position.set(0.8, 0.4, 2.4); sc.add(fireL);
@@ -2190,11 +2196,10 @@ function buildHouse() {
   floorPlane(7.4, 0.4, 8.6, 11.0, M.rug, 0.006, 2);
   F.table(7.3, 5.5, Math.PI / 2, 1.0, 0.4, 0.85);
   const rack = new THREE.Group(); part(rack, new THREE.CylinderGeometry(0.02, 0.02, 1.8, 6), M.darkWood, 0, 0.9, 0); for (let i = 0; i < 4; i++) part(rack, new THREE.CylinderGeometry(0.01, 0.01, 0.25, 4), M.darkWood, Math.cos(i * 1.57) * 0.1, 1.7, Math.sin(i * 1.57) * 0.1, Math.sin(i * 1.57) * 0.8, 0, -Math.cos(i * 1.57) * 0.8); const coat = part(rack, lumpy(new THREE.CylinderGeometry(0.12, 0.25, 1.0, 10), 0.03), M.fabricBlue, 0.05, 1.15, 0); place(rack, 8.65, 0.5, 0, 0.4, 0.4, 1.8);
-  for (let i = 0; i < 12; i++) { const z = 8.2 + i * 0.32, y = i * 0.22; box(1.0, 0.22, 0.32, M.wood, 8.4, y, z, { col: false }); }
-  addCollider(7.9, 8.9, 8.0, 12, 0, 2.7, true);
-  box(1.0, 2.7, 3.9, M.lightWood, 8.4, 0, 10.05, { col: false, uvs: 0.8 }).visible = false;
-  F.boxes(8.4, 11.3, 3, 0.6); F.crate(8.2, 10.6, 0.6);
-  for (const [a, b] of [[0.9, 0.3], [1.4, -0.35]]) { const plank = box(1.2, 0.12, 0.03, M.lightWood, 8.4, 2.2 + a * 0.1, 11.9, { col: false }); plank.rotation.z = b; }
+  for (let i = 0; i < 12; i++) { const z = 8.2 + i * 0.32, y = i * 0.22; box(0.95, 0.22, 0.32, M.wood, 7.56, y, z, { col: false }); box(0.95, y, 0.32, M.lightWood, 7.56, 0, z, { col: false }); }
+  addCollider(7.08, 8.05, 8.0, 12, 0, 2.7, true);
+  F.boxes(7.5, 11.3, 3, 0.6); F.crate(8.5, 11.4, 0.55);
+  for (const [a, b] of [[0.9, 0.3], [1.4, -0.35]]) { const plank = box(1.1, 0.12, 0.03, M.lightWood, 7.56, 2.2 + a * 0.1, 11.85, { col: false }); plank.rotation.z = b; }
   F.frame(7.08, 1.9, 2.1, Math.PI / 2, portrait(0), 0.36, 0.46, -0.08); F.frame(8.92, 1.85, 7.5, -Math.PI / 2, portrait(1), 0.4, 0.3);
   F.bulb(8.0, 2.7, 3.5); F.bulb(8.0, 2.7, 7.0);
   // cuadro eléctrico (puzle)
@@ -2234,7 +2239,7 @@ function buildHouse() {
   addNote('f1', 15.35, 1.2, 1.79, -Math.PI / 2, false);
   addNote('f2', 15.6, 0.77, 7.8, 0.4);
   // puzle: orden de los fusibles
-  const order = shuffle([1, 2, 3]); W.fuseOrder = order; W.fuseOrderText = order.map((n) => ['', 'primero', 'segundo', 'tercero'][n] && n).join(' → ');
+  const order = shuffle([1, 2, 3]); W.fuseOrder = order;
   W.fuseOrderText = order.join(' → ');
   W.secret = { shelf, opened: false, collider: shelf.userData.col };
   W.onSecret = () => {
@@ -2248,7 +2253,7 @@ function buildHouse() {
   const spots = [[4.0, 0.43, 2.75], [14.9, 0.92, 0.35], [12.4, 0.79, 3.5], [14.3, 0.66, 10.4], [15.65, 0.56, 11.7], [3.65, 0.92, 7.8], [1.0, 0.33, 11.5], [7.3, 0.86, 5.6], [3.4, 0.55, 4.25], [15.6, 0.77, 7.3], [0.32, 1.19, 2.6], [10.8, 0.01, 7.4], [6.4, 0.63, 3.1], [8.3, 0.01, 1.5], [12.0, 0.01, 10.6]];
   spawnItems(spots, LEVEL_ITEMS.floor, 5);
   // jugador / enemigo
-  W.spawn = { pos: V3(2.0, 0, 1.4), yaw: Math.atan2(-1, -1) * -1 };
+  W.spawn = { pos: V3(2.0, 0, 1.4), yaw: 0 };
   W.spawn.yaw = Math.atan2(-(6 - 2.0), -(3 - 1.4));
   W.enemySpawn = V3(12.5, 0, 8.5);
   W.tool = 'flashlight'; W.drain = 0.35;
@@ -2288,8 +2293,8 @@ const BASEMENT_MAP = [
   '#I..#...#S#...#.#I...#',
   '#.#######.#####.#.####',
   '#...L...#...N...#..O.#',
-  '#.#K###.#.#####.##.#.#',
-  '#.#XX#...#I..S.#..#..#',
+  '#.#K###.#.#####.#..#.#',
+  '#.#XX#....I..S.#..#..#',
   '#.#XX#.L.#.#####B.I..#',
   '######################',
 ];
@@ -3148,7 +3153,7 @@ async function startLevel(idx) {
   PLAYER.reset({ pos: V3(), yaw: 0 });
   LV.build();
   mergeStatic(W.scene);
-  W.nav = idx < 3 ? new NavGrid(W.bounds, idx === 1 ? 0.5 : 0.4) : null;
+  W.nav = idx < 3 ? new NavGrid(W.bounds, idx === 0 ? 0.25 : idx === 1 ? 0.5 : 0.4, idx === 0 ? 0.24 : 0.34) : null;
   if (idx !== 1) W.rain = makeRain(W.scene, SETTINGS.quality >= 2 ? 7000 : 3500, 40, W.rainExclude);
   PLAYER.reset(W.spawn);
   camera.position.set(PLAYER.pos.x, PLAYER.h, PLAYER.pos.z); camera.rotation.set(0, PLAYER.yaw, 0); camera.fov = SETTINGS.fov; camera.updateProjectionMatrix();
@@ -3277,12 +3282,13 @@ function buildMenuScene() {
   F.cobweb(-2.9, 2.6, -1.9, Math.PI / 4, 0.9); F.cobweb(1.3, 2.6, -5.9, -Math.PI / 4, 0.7);
   F.boxes(-2.4, 4.6, 3, 0.6); F.bookshelf(-1.0, -5.75, 0, 1.2, 2.0); F.chair(-2.3, 0.0, 0.9, true);
   // bombilla que cuelga sobre el animatrónico
-  const bulb = new THREE.Group(); bulb.position.set(0, H, -3.0); sc.add(bulb); bulb.userData.dynamic = true;
+  const bulb = new THREE.Group(); bulb.position.set(0, H, -2.25); sc.add(bulb); bulb.userData.dynamic = true;
   part(bulb, new THREE.CylinderGeometry(0.004, 0.004, 0.6, 4), M.black, 0, -0.3, 0);
   const bm = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffc070, emissiveIntensity: 2 }); part(bulb, new THREE.SphereGeometry(0.05, 10, 8), bm, 0, -0.64, 0);
-  const bl = new THREE.PointLight(0xffb060, 4, 6, 1.6); bl.position.y = -0.7; bl.castShadow = true; bl.shadow.mapSize.set(512, 512); bl.shadow.bias = -0.002; bulb.add(bl);
+  const bl = new THREE.PointLight(0xffb060, 7, 7, 1.5); bl.position.y = -0.7; bl.castShadow = true; bl.shadow.mapSize.set(512, 512); bl.shadow.bias = -0.002; bulb.add(bl);
   MENU.bulb = { g: bulb, l: bl, m: bm, off: 0 };
-  const fill = new THREE.PointLight(0x5a6a9a, 0.6, 8, 2); fill.position.set(0, 1.8, 3.5); sc.add(fill);
+  const fill = new THREE.PointLight(0x5a6a9a, 0.9, 8, 2); fill.position.set(0, 1.8, 3.5); sc.add(fill);
+  const rim = new THREE.PointLight(0xff3020, 2.5, 5, 2); rim.position.set(0, 1.2, -5.2); sc.add(rim);
   for (const k of ['bear', 'rabbit', 'fox', 'chick']) { const A = buildAnimatronic(k); A.root.position.set(0, 0, -2.9); A.root.visible = false; sc.add(A.root); MENU.models[k] = A; }
   sc.add(camera);
   mergeStatic(sc);
@@ -3302,8 +3308,8 @@ function updateMenu(dt) {
   W.updaters.forEach((f) => f(dt, U_TIME.value));
   if (MENU.swapT > 0) { MENU.swapT -= dt; if (MENU.swapT <= 0 && MENU.pending) { showMenuModel(MENU.pending); MENU.pending = null; } }
   const B = MENU.bulb; B.g.rotation.z = Math.sin(U_TIME.value * 0.7) * 0.06; B.g.rotation.x = Math.cos(U_TIME.value * 0.5) * 0.04;
-  let f = 1; if (B.off > 0) { B.off -= dt; f = 0; } else if (Math.random() < 0.015) B.off = rand(0.05, 0.25); else f = 0.9 + Math.random() * 0.1;
-  B.l.intensity = 4 * f; B.m.emissiveIntensity = 2 * f;
+  let f = 1; if (B.off > 0) { B.off -= dt; f = 0; } else if (Math.random() < dt * 0.4) B.off = rand(0.05, 0.2); else f = 0.9 + Math.random() * 0.1;
+  B.l.intensity = 7 * f; B.m.emissiveIntensity = 2 * f;
   if (MENU.cur) {
     const A = MENU.cur; A.root.position.z = -2.9 + Math.sin(U_TIME.value * 0.3) * 0.03;
     animateModel(A, dt, { speed: 0, pose: 'idle', look: camera.position, eyeI: f > 0 ? 4 : 6, glow: f > 0 ? 0.6 : 1, servo: () => Math.random() < 0.3 && AUD.servo(null, 0.03, 0.4) });

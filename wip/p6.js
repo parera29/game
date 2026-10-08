@@ -49,10 +49,8 @@ function buildHouse() {
   const fdoor = box(1.0, 2.15, 0.06, M.door, 8, 0, 0.0, { col: true, uvs: 0 }); fdoor.geometry.attributes.uv.needsUpdate = true; fdoor.userData.dynamic = true;
   addInteract(fdoor, 'Abrir puerta principal', () => { AUD.burst({ type: 'brown', f: 300, dur: 0.2, vol: 0.6 }); subtitle('Está cerrada con llave. No puedo irme sin sus recuerdos.'); });
   // --- SALÓN ---
-  F.rug && 0;
-  const rug = floorPlane(2.6, 1.6, 5.6, 4.0, M.rug, 0.006, 3); rug.receiveShadow = true;
-  F.tv(4.6, 0.45, 0); W.tv = W.scene.children[W.scene.children.length - 1];
-  W.tvObj = F_last_tv;
+    const rug = floorPlane(2.6, 1.6, 5.6, 4.0, M.rug, 0.006, 3); rug.receiveShadow = true;
+  F.tv(4.6, 0.45, 0);
   F.sofa(4.0, 4.3, Math.PI); F.table(4.0, 2.75, 0, 1.1, 0.6, 0.42);
   const fp = F.fireplace(0.32, 2.4, Math.PI / 2); W.fireEm = fp.em;
   const fireL = new THREE.PointLight(0xff5a18, 1.2, 4, 2); fireL.position.set(0.8, 0.4, 2.4); sc.add(fireL);
@@ -72,11 +70,10 @@ function buildHouse() {
   floorPlane(7.4, 0.4, 8.6, 11.0, M.rug, 0.006, 2);
   F.table(7.3, 5.5, Math.PI / 2, 1.0, 0.4, 0.85);
   const rack = new THREE.Group(); part(rack, new THREE.CylinderGeometry(0.02, 0.02, 1.8, 6), M.darkWood, 0, 0.9, 0); for (let i = 0; i < 4; i++) part(rack, new THREE.CylinderGeometry(0.01, 0.01, 0.25, 4), M.darkWood, Math.cos(i * 1.57) * 0.1, 1.7, Math.sin(i * 1.57) * 0.1, Math.sin(i * 1.57) * 0.8, 0, -Math.cos(i * 1.57) * 0.8); const coat = part(rack, lumpy(new THREE.CylinderGeometry(0.12, 0.25, 1.0, 10), 0.03), M.fabricBlue, 0.05, 1.15, 0); place(rack, 8.65, 0.5, 0, 0.4, 0.4, 1.8);
-  for (let i = 0; i < 12; i++) { const z = 8.2 + i * 0.32, y = i * 0.22; box(1.0, 0.22, 0.32, M.wood, 8.4, y, z, { col: false }); }
-  addCollider(7.9, 8.9, 8.0, 12, 0, 2.7, true);
-  box(1.0, 2.7, 3.9, M.lightWood, 8.4, 0, 10.05, { col: false, uvs: 0.8 }).visible = false;
-  F.boxes(8.4, 11.3, 3, 0.6); F.crate(8.2, 10.6, 0.6);
-  for (const [a, b] of [[0.9, 0.3], [1.4, -0.35]]) { const plank = box(1.2, 0.12, 0.03, M.lightWood, 8.4, 2.2 + a * 0.1, 11.9, { col: false }); plank.rotation.z = b; }
+  for (let i = 0; i < 12; i++) { const z = 8.2 + i * 0.32, y = i * 0.22; box(0.95, 0.22, 0.32, M.wood, 7.56, y, z, { col: false }); box(0.95, y, 0.32, M.lightWood, 7.56, 0, z, { col: false }); }
+  addCollider(7.08, 8.05, 8.0, 12, 0, 2.7, true);
+  F.boxes(7.5, 11.3, 3, 0.6); F.crate(8.5, 11.4, 0.55);
+  for (const [a, b] of [[0.9, 0.3], [1.4, -0.35]]) { const plank = box(1.1, 0.12, 0.03, M.lightWood, 7.56, 2.2 + a * 0.1, 11.85, { col: false }); plank.rotation.z = b; }
   F.frame(7.08, 1.9, 2.1, Math.PI / 2, portrait(0), 0.36, 0.46, -0.08); F.frame(8.92, 1.85, 7.5, -Math.PI / 2, portrait(1), 0.4, 0.3);
   F.bulb(8.0, 2.7, 3.5); F.bulb(8.0, 2.7, 7.0);
   // cuadro eléctrico (puzle)
@@ -116,7 +113,7 @@ function buildHouse() {
   addNote('f1', 15.35, 1.2, 1.79, -Math.PI / 2, false);
   addNote('f2', 15.6, 0.77, 7.8, 0.4);
   // puzle: orden de los fusibles
-  const order = shuffle([1, 2, 3]); W.fuseOrder = order; W.fuseOrderText = order.map((n) => ['', 'primero', 'segundo', 'tercero'][n] && n).join(' → ');
+  const order = shuffle([1, 2, 3]); W.fuseOrder = order;
   W.fuseOrderText = order.join(' → ');
   W.secret = { shelf, opened: false, collider: shelf.userData.col };
   W.onSecret = () => {
@@ -130,7 +127,7 @@ function buildHouse() {
   const spots = [[4.0, 0.43, 2.75], [14.9, 0.92, 0.35], [12.4, 0.79, 3.5], [14.3, 0.66, 10.4], [15.65, 0.56, 11.7], [3.65, 0.92, 7.8], [1.0, 0.33, 11.5], [7.3, 0.86, 5.6], [3.4, 0.55, 4.25], [15.6, 0.77, 7.3], [0.32, 1.19, 2.6], [10.8, 0.01, 7.4], [6.4, 0.63, 3.1], [8.3, 0.01, 1.5], [12.0, 0.01, 10.6]];
   spawnItems(spots, LEVEL_ITEMS.floor, 5);
   // jugador / enemigo
-  W.spawn = { pos: V3(2.0, 0, 1.4), yaw: Math.atan2(-1, -1) * -1 };
+  W.spawn = { pos: V3(2.0, 0, 1.4), yaw: 0 };
   W.spawn.yaw = Math.atan2(-(6 - 2.0), -(3 - 1.4));
   W.enemySpawn = V3(12.5, 0, 8.5);
   W.tool = 'flashlight'; W.drain = 0.35;
@@ -170,8 +167,8 @@ const BASEMENT_MAP = [
   '#I..#...#S#...#.#I...#',
   '#.#######.#####.#.####',
   '#...L...#...N...#..O.#',
-  '#.#K###.#.#####.##.#.#',
-  '#.#XX#...#I..S.#..#..#',
+  '#.#K###.#.#####.#..#.#',
+  '#.#XX#....I..S.#..#..#',
   '#.#XX#.L.#.#####B.I..#',
   '######################',
 ];
