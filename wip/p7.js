@@ -321,7 +321,7 @@ function showDeath() {
   camera.fov = SETTINGS.fov; camera.updateProjectionMatrix();
   if (document.pointerLockElement) { G.ignoreUnlock = true; document.exitPointerLock(); }
   AUD.stopAllLoops(); AUD.staticNoise(1.6, 0.35);
-  staticFX(1, 99999);
+  staticFX(1, 700); setTimeout(() => { if (G.state === 'dead') staticFX(0.18, 1e9); }, 700);
   $('death').querySelector('.d2').textContent = SPECS[LV.anim].name + ' · ' + LV.name;
   $('death').querySelector('.d1').textContent = pick(['TE ENCONTRÓ', 'DEMASIADO TARDE', 'NO HAY SALIDA', 'TE ATRAPÓ']);
   $('death').classList.remove('hidden');
