@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Joy of Creation: Scrapped</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@300;400;600&family=Homemade+Apple&family=VT323&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root{
+  --fg:#e8e2d6; --dim:#8d877c; --red:#b3170f; --red2:#ff2a1a; --panel:rgba(8,7,6,.86);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--fg);font-family:'Oswald',sans-serif;user-select:none;-webkit-user-select:none}
+canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:none}
+.layer{position:fixed;inset:0;pointer-events:none}
+.hidden{display:none!important}
+button{font-family:inherit}
+
+/* ---------- LOADING ---------- */
+#loading{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;pointer-events:auto}
+#loading h1{font-family:'Special Elite',monospace;font-size:clamp(28px,5vw,64px);letter-spacing:.08em;color:#ddd;text-shadow:0 0 18px rgba(255,255,255,.15)}
+#loading h2{font-family:'Special Elite';color:var(--red);letter-spacing:.6em;font-size:clamp(14px,2vw,22px);margin:.4em 0 2.5em}
+#loadbar{width:min(420px,80vw);height:3px;background:#1a1a1a;overflow:hidden}
+#loadfill{height:100%;width:0;background:#cfc8b8;transition:width .15s}
+#loadtxt{margin-top:14px;font-family:'VT323';font-size:20px;color:#777;letter-spacing:.1em}
+#clickstart{margin-top:30px;font-family:'VT323';font-size:26px;letter-spacing:.2em;color:#ddd;animation:blink 1.4s infinite;cursor:pointer}
+#warnbox{margin-top:26px;max-width:560px;text-align:center;color:#6d675e;font-size:14px;line-height:1.5;padding:0 16px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ---------- MENU ---------- */
+#menu{position:fixed;inset:0;z-index:20;pointer-events:none}
+#menuLeft{position:absolute;left:5vw;top:8vh;bottom:6vh;width:min(460px,90vw);display:flex;flex-direction:column;pointer-events:auto}
+#title{font-family:'Special Elite',monospace;line-height:.92;color:#e9e4da;text-shadow:0 0 22px rgba(0,0,0,.9),0 0 3px rgba(255,255,255,.25);position:relative}
+#title .t1{font-size:clamp(18px,2.1vw,30px);letter-spacing:.35em;color:#a9a294}
+#title .t2{font-size:clamp(38px,5.6vw,84px);letter-spacing:.02em}
+#title .t3{font-size:clamp(20px,2.4vw,36px);letter-spacing:.75em;color:var(--red);margin-top:.35em;text-shadow:0 0 14px rgba(200,0,0,.55)}
+#title.glitch .t2{animation:glitch .18s steps(2) 2}
+@keyframes glitch{0%{transform:translate(0);filter:none}25%{transform:translate(-4px,1px);text-shadow:3px 0 #f00,-3px 0 #0ff}50%{transform:translate(3px,-2px)}100%{transform:translate(0)}}
+#levelList{margin-top:5vh;display:flex;flex-direction:column;gap:2px}
+.lvl{display:flex;align-items:baseline;gap:14px;padding:7px 0;cursor:pointer;color:#7d776c;transition:color .15s, padding .15s;font-size:clamp(18px,2vw,26px);letter-spacing:.12em;text-transform:uppercase}
+.lvl .num{font-family:'VT323';font-size:.9em;color:#4d4840;width:28px}
+.lvl .sub{font-size:.5em;letter-spacing:.25em;color:#4f4a43}
+.lvl .chk{font-size:.55em;color:#6c8a5a;margin-left:auto;font-family:'VT323';letter-spacing:.1em}
+.lvl:hover{color:#cfc8b8}
+.lvl.sel{color:#f4efe5;padding-left:14px;text-shadow:0 0 12px rgba(255,255,255,.25)}
+.lvl.sel .num{color:var(--red2)}
+#lvlInfo{margin-top:16px;font-size:14px;color:#8a8478;letter-spacing:.06em;line-height:1.55;min-height:66px;border-left:2px solid #3a0d0a;padding-left:12px}
+#lvlInfo b{color:#d9d2c4;font-weight:400}
+#menuBtns{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.mbtn{background:none;border:none;color:#9b9488;font-size:clamp(17px,1.7vw,23px);letter-spacing:.3em;text-align:left;padding:6px 0;cursor:pointer;transition:all .15s;text-transform:uppercase}
+.mbtn:hover{color:#fff;padding-left:12px;text-shadow:0 0 10px rgba(255,255,255,.3)}
+.mbtn.play{color:#f1ebdf;font-size:clamp(24px,2.6vw,34px);font-weight:600}
+.mbtn.play:hover{color:var(--red2)}
+#menuFoot{position:absolute;right:3vw;bottom:3vh;font-family:'VT323';color:#4a453e;font-size:18px;letter-spacing:.15em;text-align:right}
+#animName{position:absolute;right:6vw;top:10vh;text-align:right;pointer-events:none}
+#animName .n{font-family:'Special Elite';font-size:clamp(26px,3.4vw,50px);color:#d8d0c2;letter-spacing:.15em;text-shadow:0 0 18px #000}
+#animName .s{font-family:'VT323';font-size:20px;color:#8e2a20;letter-spacing:.3em}
+
+/* ---------- PANELS ---------- */
+.panel{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;pointer-events:auto;backdrop-filter:blur(2px)}
+.pbox{width:min(980px,94vw);max-height:88vh;background:var(--panel);border:1px solid #2b2620;box-shadow:0 0 60px #000, inset 0 0 80px rgba(0,0,0,.6);display:flex;flex-direction:column}
+.phead{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #2b2620}
+.phead h3{font-family:'Special Elite';font-weight:400;letter-spacing:.2em;font-size:24px}
+.xbtn{background:none;border:1px solid #3a342c;color:#aaa;padding:4px 14px;cursor:pointer;letter-spacing:.2em}
+.xbtn:hover{border-color:#aaa;color:#fff}
+.pbody{padding:20px 26px;overflow:auto;line-height:1.6;color:#c9c2b5;font-size:15px}
+.pbody h4{font-family:'Special Elite';font-weight:400;color:#f0e9dc;font-size:20px;letter-spacing:.1em;margin:14px 0 8px}
+.pbody p{margin:6px 0}
+.pbody ul{margin:6px 0 6px 20px}
+.pbody li{margin:3px 0}
+.pbody .k{display:inline-block;border:1px solid #555;border-radius:3px;padding:0 6px;font-family:'VT323';font-size:17px;color:#ddd;background:#141210}
+.tabs{display:flex;gap:2px;padding:0 24px;border-bottom:1px solid #2b2620;flex-wrap:wrap}
+.tab{background:none;border:none;color:#777;padding:10px 14px;cursor:pointer;letter-spacing:.15em;font-size:14px;text-transform:uppercase;border-bottom:2px solid transparent}
+.tab.on{color:#fff;border-bottom-color:var(--red)}
+.secret{filter:blur(6px);transition:filter .3s;cursor:pointer;position:relative}
+.secret.rev{filter:none}
+.secretHint{font-family:'VT323';color:var(--red2);font-size:18px;letter-spacing:.1em;margin-top:12px}
+#spoiler .pbox{width:min(560px,92vw);text-align:center}
+#spoiler .warnicon{font-size:64px;color:#c4a000;margin:10px 0}
+#spoiler .pbody{font-size:16px}
+.rowbtn{display:flex;gap:16px;justify-content:center;margin:18px 0 6px}
+.bigbtn{background:#120f0c;border:1px solid #4a3f33;color:#e6dfd2;padding:10px 26px;letter-spacing:.25em;cursor:pointer;font-size:15px;text-transform:uppercase}
+.bigbtn:hover{background:#2a0b08;border-color:var(--red2)}
+.opt{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e1b17;gap:20px}
+.opt label{letter-spacing:.15em;text-transform:uppercase;font-size:14px;color:#aaa}
+.opt input[type=range]{width:240px;accent-color:#a11}
+.opt select{background:#111;color:#ddd;border:1px solid #444;padding:4px 8px;font-family:inherit}
+.lore-item{border:1px solid #2a251f;padding:10px 14px;margin:8px 0;cursor:pointer;background:#0d0b09}
+.lore-item:hover{border-color:#6a5a44}
+.lore-item.locked{color:#444;cursor:default}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none;font-family:'Oswald'}
+#hudTL{position:absolute;left:34px;top:26px}
+#hudLevel{font-size:13px;letter-spacing:.45em;color:rgba(230,224,212,.55);text-transform:uppercase}
+#hudObj{font-size:22px;letter-spacing:.12em;color:rgba(240,235,225,.92);text-shadow:0 0 8px #000;margin-top:2px}
+#hudObj b{color:#fff;font-weight:600}
+#hudList{position:absolute;left:34px;bottom:34px;font-size:15px;letter-spacing:.08em;color:rgba(230,224,212,.75);text-shadow:0 0 6px #000;line-height:1.65}
+#hudList .it{display:flex;align-items:center;gap:10px}
+#hudList .bx{width:11px;height:11px;border:1px solid rgba(230,224,212,.7);display:inline-block;position:relative}
+#hudList .it.got{color:rgba(160,155,145,.45);text-decoration:line-through}
+#hudList .it.got .bx::after{content:'';position:absolute;inset:2px;background:#cfc8b8}
+#hudTR{position:absolute;right:34px;top:24px;text-align:right}
+#hudTime{font-family:'VT323';font-size:38px;letter-spacing:.06em;color:rgba(240,235,225,.9);text-shadow:0 0 8px #000}
+#hudTime.hunt{color:#ff3b2b;animation:blink .6s infinite}
+#hudHunt{font-size:12px;letter-spacing:.35em;color:#ff3b2b;margin-top:-4px}
+#hudBR{position:absolute;right:34px;bottom:32px;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+#battery{display:flex;align-items:center;gap:8px;font-family:'VT323';font-size:20px;color:rgba(230,224,212,.8)}
+#batIcon{width:46px;height:20px;border:2px solid rgba(230,224,212,.8);position:relative;padding:2px;display:flex;gap:2px}
+#batIcon::after{content:'';position:absolute;right:-6px;top:5px;width:4px;height:7px;background:rgba(230,224,212,.8)}
+#batIcon i{flex:1;background:rgba(230,224,212,.85)}
+#batIcon i.off{background:rgba(230,224,212,.1)}
+#batIcon.low i{background:#c22}
+#special{font-size:14px;letter-spacing:.15em;color:#d8c48a;text-shadow:0 0 6px #000}
+#special .k{border:1px solid #d8c48a;padding:0 6px;margin-right:6px;font-family:'VT323';font-size:17px}
+#stamina{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);width:260px;height:3px;background:rgba(255,255,255,.08);opacity:0;transition:opacity .4s}
+#stamina i{display:block;height:100%;width:100%;background:rgba(235,230,220,.75)}
+#stamina.tired i{background:#a33}
+#cross{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:rgba(255,255,255,.55);transition:all .15s}
+#cross.on{width:14px;height:14px;margin:-7px 0 0 -7px;background:none;border:2px solid rgba(255,255,255,.85)}
+#prompt{position:absolute;left:50%;top:calc(50% + 26px);transform:translateX(-50%);font-size:15px;letter-spacing:.18em;color:#eee;text-shadow:0 0 6px #000;white-space:nowrap}
+#prompt .k{border:1px solid #ccc;padding:0 6px;margin-right:8px;font-family:'VT323';font-size:18px}
+#notify{position:absolute;left:50%;top:22%;transform:translateX(-50%);text-align:center;font-size:20px;letter-spacing:.25em;color:#efe9dd;text-shadow:0 0 12px #000;opacity:0;transition:opacity .5s;text-transform:uppercase}
+#notify small{display:block;font-size:12px;letter-spacing:.4em;color:#9b9488;margin-top:4px}
+#subtitle{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);font-family:'Special Elite';font-size:18px;color:#d6cfc1;text-shadow:0 0 8px #000,0 0 2px #000;opacity:0;transition:opacity .6s;text-align:center;max-width:80vw}
+#hurt{position:absolute;inset:0;box-shadow:inset 0 0 220px rgba(120,0,0,.0);transition:box-shadow .2s}
+
+/* ---------- OVERLAYS ---------- */
+#fade{position:fixed;inset:0;background:#000;z-index:40;opacity:1;pointer-events:none;transition:opacity .9s}
+#staticCv{position:fixed;inset:0;width:100%;height:100%;z-index:41;pointer-events:none;opacity:0;image-rendering:pixelated}
+#intro{position:fixed;inset:0;z-index:35;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;text-align:center}
+#intro .l1{font-family:'VT323';color:#7a2018;letter-spacing:.5em;font-size:22px}
+#intro .l2{font-family:'Special Elite';font-size:clamp(40px,6vw,86px);letter-spacing:.12em;margin:8px 0 18px}
+#intro .l3{max-width:640px;color:#a59e91;font-size:17px;line-height:1.7;letter-spacing:.05em;padding:0 20px}
+#intro .l4{margin-top:44px;font-family:'VT323';font-size:22px;letter-spacing:.3em;color:#ccc;animation:blink 1.4s infinite}
+#pause .pbox{width:min(420px,90vw)}
+#pause .pbody{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+#death{position:fixed;inset:0;z-index:36;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;background:rgba(0,0,0,.25)}
+#death .d1{font-family:'Special Elite';font-size:clamp(40px,7vw,100px);letter-spacing:.15em;color:#e8e2d6;text-shadow:0 0 30px #000,0 0 6px #000}
+#death .d2{font-family:'VT323';font-size:24px;letter-spacing:.4em;color:#ff3b2b;margin:6px 0 30px;text-shadow:0 0 8px #000}
+#win{position:fixed;inset:0;z-index:36;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;background:#000}
+#win .w1{font-family:'Special Elite';font-size:clamp(40px,6vw,86px);letter-spacing:.15em}
+#win .w2{font-family:'VT323';font-size:26px;letter-spacing:.3em;color:#9fb98a;margin:8px 0 6px}
+#win .w3{color:#8d877c;letter-spacing:.15em;margin-bottom:30px;text-align:center;line-height:1.7}
+#note{position:fixed;inset:0;z-index:37;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);pointer-events:auto}
+#paper{width:min(560px,90vw);min-height:60vh;max-height:86vh;overflow:auto;padding:46px 48px;color:#2a2219;font-family:'Homemade Apple',cursive;font-size:17px;line-height:2.0;background:
+ radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.35),transparent 60%),
+ radial-gradient(circle at 80% 85%,rgba(110,70,20,.35),transparent 30%),
+ radial-gradient(circle at 12% 70%,rgba(110,70,20,.18),transparent 20%),
+ repeating-linear-gradient(0deg,transparent 0 33px,rgba(70,90,140,.18) 33px 34px),
+ #d9cfb6;box-shadow:0 0 70px #000;transform:rotate(-1.2deg);position:relative}
+#paper h5{font-family:'Special Elite';font-size:20px;margin-bottom:10px;font-weight:400}
+#paper .close{position:absolute;right:16px;top:10px;font-family:'VT323';font-size:18px;color:#6d5a40}
+#keypad{position:fixed;inset:0;z-index:37;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);pointer-events:auto}
+#kpbox{background:linear-gradient(#3a3a36,#22221f);border:3px solid #111;border-radius:6px;padding:22px;box-shadow:0 0 50px #000, inset 0 0 12px rgba(0,0,0,.8)}
+#kpscreen{background:#0d1a0d;color:#58ff6b;font-family:'VT323';font-size:40px;text-align:center;letter-spacing:.5em;padding:6px 0 6px .5em;margin-bottom:14px;border:2px inset #000;text-shadow:0 0 8px #3f3}
+#kpgrid{display:grid;grid-template-columns:repeat(3,64px);gap:8px}
+#kpgrid button{height:56px;background:linear-gradient(#5b5b55,#3b3b37);border:2px solid #191917;color:#ddd;font-family:'VT323';font-size:30px;cursor:pointer;border-radius:4px}
+#kpgrid button:active{transform:translateY(2px)}
+#kpclose{margin-top:12px;width:100%}
+#fuse{position:fixed;inset:0;z-index:37;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);pointer-events:auto}
+#fusebox{background:linear-gradient(#55524b,#34322d);padding:26px 30px;border:4px solid #1b1a17;box-shadow:0 0 50px #000;text-align:center}
+#fusebox h6{font-family:'VT323';font-size:22px;letter-spacing:.2em;color:#ddd;margin-bottom:12px}
+#fuseRow{display:flex;gap:22px;justify-content:center}
+.fsw{width:54px;height:110px;background:#1c1b18;border:2px solid #0b0b0a;position:relative;cursor:pointer;border-radius:3px}
+.fsw i{position:absolute;left:8px;right:8px;height:44px;background:linear-gradient(#ccc,#777);top:8px;transition:top .12s;border-radius:2px}
+.fsw.on i{top:54px;background:linear-gradient(#e3c25b,#9a7a20)}
+.fsw span{position:absolute;bottom:-26px;left:0;right:0;font-family:'VT323';font-size:20px;color:#bbb}
+#fuseMsg{margin-top:36px;font-family:'VT323';font-size:20px;color:#bbb;min-height:24px}
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="hurt"></div>
+  <div id="hudTL"><div id="hudLevel">PRIMER PISO</div><div id="hudObj">OBJETOS <b>0</b> / 5</div></div>
+  <div id="hudTR"><div id="hudTime">00:00.0</div><div id="hudHunt" class="hidden">TE ESTÁ CAZANDO</div></div>
+  <div id="hudList"></div>
+  <div id="hudBR"><div id="special" class="hidden"></div><div id="battery"><span id="batLbl">LINTERNA</span><div id="batIcon"><i></i><i></i><i></i><i></i><i></i></div></div></div>
+  <div id="stamina"><i></i></div>
+  <div id="cross"></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="notify"></div>
+  <div id="subtitle"></div>
+</div>
+
+<div id="menu" class="hidden">
+  <div id="menuLeft">
+    <div id="title"><div class="t1">THE</div><div class="t2">JOY OF CREATION</div><div class="t3">SCRAPPED</div></div>
+    <div id="levelList"></div>
+    <div id="lvlInfo"></div>
+    <div id="menuBtns">
+      <button class="mbtn play" id="btnPlay">Jugar</button>
+      <button class="mbtn" id="btnDocs">Documentación</button>
+      <button class="mbtn" id="btnExtras">Extras</button>
+      <button class="mbtn" id="btnOpts">Opciones</button>
+    </div>
+  </div>
+  <div id="animName"><div class="n">TEDDY</div><div class="s">PRIMER PISO</div></div>
+  <div id="menuFoot">FAN GAME · INSPIRADO EN TJOC: REBORN<br>v1.0</div>
+</div>
+
+<div id="spoiler" class="panel hidden"><div class="pbox">
+  <div class="pbody">
+    <div class="warnicon">⚠</div>
+    <h4 style="text-align:center;margin-top:0">ADVERTENCIA DE SPOILERS</h4>
+    <p>La documentación explica en detalle cómo funciona cada nivel, el comportamiento de cada animatrónico, la ubicación de los secretos, los puzles y los objetos especiales.</p>
+    <p style="color:#8a8478">Si quieres descubrirlo todo por tu cuenta, vuelve atrás.</p>
+    <div class="rowbtn"><button class="bigbtn" id="spBack">Volver</button><button class="bigbtn" id="spGo">Abrir igualmente</button></div>
+  </div></div></div>
+
+<div id="docs" class="panel hidden"><div class="pbox">
+  <div class="phead"><h3>DOCUMENTACIÓN</h3><button class="xbtn" data-close="docs">CERRAR</button></div>
+  <div class="tabs" id="docTabs"></div>
+  <div class="pbody" id="docBody"></div>
+</div></div>
+
+<div id="extras" class="panel hidden"><div class="pbox">
+  <div class="phead"><h3>EXTRAS</h3><button class="xbtn" data-close="extras">CERRAR</button></div>
+  <div class="pbody" id="extrasBody"></div>
+</div></div>
+
+<div id="opts" class="panel hidden"><div class="pbox" style="width:min(640px,94vw)">
+  <div class="phead"><h3>OPCIONES</h3><button class="xbtn" data-close="opts">CERRAR</button></div>
+  <div class="pbody">
+    <div class="opt"><label>Sensibilidad del ratón</label><input type="range" id="oSens" min="0.2" max="3" step="0.05"></div>
+    <div class="opt"><label>Volumen general</label><input type="range" id="oVol" min="0" max="1" step="0.01"></div>
+    <div class="opt"><label>Brillo</label><input type="range" id="oBright" min="0.6" max="1.8" step="0.01"></div>
+    <div class="opt"><label>Campo de visión</label><input type="range" id="oFov" min="60" max="95" step="1"></div>
+    <div class="opt"><label>Calidad gráfica</label><select id="oQual"><option value="0">Baja</option><option value="1">Media</option><option value="2">Alta</option></select></div>
+    <div class="opt"><label>Dificultad</label><select id="oDiff"><option value="0">Normal</option><option value="1">Pesadilla</option></select></div>
+    <div class="opt"><label>Invertir eje Y</label><select id="oInv"><option value="0">No</option><option value="1">Sí</option></select></div>
+    <div class="opt"><label>Borrar progreso</label><button class="bigbtn" id="oReset" style="padding:4px 14px">Borrar</button></div>
+  </div>
+</div></div>
+
+<div id="pause" class="panel hidden"><div class="pbox">
+  <div class="phead"><h3>PAUSA</h3></div>
+  <div class="pbody">
+    <button class="bigbtn" id="pResume">Continuar</button>
+    <button class="bigbtn" id="pOpts">Opciones</button>
+    <button class="bigbtn" id="pRestart">Reiniciar nivel</button>
+    <button class="bigbtn" id="pMenu">Menú principal</button>
+  </div>
+</div></div>
+
+<div id="intro" class="hidden"><div class="l1"></div><div class="l2"></div><div class="l3"></div><div class="l4">HAZ CLIC PARA COMENZAR</div></div>
+<div id="death" class="hidden"><div class="d1">TE ENCONTRÓ</div><div class="d2"></div><div class="rowbtn"><button class="bigbtn" id="dRetry">Reintentar</button><button class="bigbtn" id="dMenu">Menú</button></div></div>
+<div id="win" class="hidden"><div class="w1">SOBREVIVISTE</div><div class="w2"></div><div class="w3"></div><div class="rowbtn"><button class="bigbtn" id="wNext">Siguiente nivel</button><button class="bigbtn" id="wMenu">Menú</button></div></div>
+<div id="note" class="hidden"><div id="paper"><div class="close">[CLIC / E PARA CERRAR]</div><h5></h5><div class="txt"></div></div></div>
+<div id="keypad" class="hidden"><div id="kpbox"><div id="kpscreen">____</div><div id="kpgrid"></div><button class="bigbtn" id="kpclose">Salir</button></div></div>
+<div id="fuse" class="hidden"><div id="fusebox"><h6>CUADRO ELÉCTRICO · ESTUDIO</h6><div id="fuseRow"></div><div id="fuseMsg"></div><button class="bigbtn" id="fuseClose" style="margin-top:14px">Salir</button></div></div>
+
+<canvas id="staticCv" width="320" height="180"></canvas>
+<div id="fade"></div>
+
+<div id="loading">
+  <h1>THE JOY OF CREATION</h1><h2>SCRAPPED</h2>
+  <div id="loadbar"><div id="loadfill"></div></div>
+  <div id="loadtxt">CARGANDO…</div>
+  <div id="clickstart" class="hidden">[ HAZ CLIC PARA ENTRAR ]</div>
+  <div id="warnbox">Este juego contiene sustos repentinos, sonidos fuertes, luces parpadeantes y temática de terror. Se recomienda usar auriculares.</div>
+</div>
+
+<script type="module">
