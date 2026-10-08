@@ -191,7 +191,7 @@ function bindOptions() {
       if (k === 'quality' && v !== prevQ) { renderer.setPixelRatio(Math.min(devicePixelRatio, v >= 2 ? 1.5 : 1)); flashlight.shadow.mapSize.set(v >= 1 ? 1024 : 512, v >= 1 ? 1024 : 512); if (flashlight.shadow.map) { flashlight.shadow.map.dispose(); flashlight.shadow.map = null; } const sc = renderPass.scene; buildComposer(); renderPass.scene = sc; Object.assign(FX, finalPass.uniforms); }
     };
   }
-  $('oReset').onclick = () => { if (!confirm('¿Borrar todo el progreso?')) return; SAVE.best = {}; SAVE.done = {}; SAVE.lore = []; SAVE.seen = []; persist(); buildLevelList(); selectLevel(G.menuSel, true); };
+  $('oReset').onclick = () => { const b = $('oReset'); if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = '¿Seguro? Pulsa otra vez'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Borrar'; }, 3000); return; } delete b.dataset.armed; b.textContent = 'Borrado'; SAVE.best = {}; SAVE.done = {}; SAVE.lore = []; SAVE.seen = []; persist(); buildLevelList(); selectLevel(G.menuSel, true); };
 }
 
 /* =====================================================================

@@ -65,14 +65,15 @@ addEventListener('keydown', (e) => {
   }
 });
 addEventListener('keyup', (e) => { KEYS[e.code] = false; });
+function lockPointer() { try { const r = canvas.requestPointerLock && canvas.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) { } }
 addEventListener('mousemove', (e) => {
-  if (document.pointerLockElement === canvas && G.state === 'play') {
+  if (G.state === 'play' && (document.pointerLockElement === canvas || (e.buttons & 1))) {
     const s = 0.0021 * SETTINGS.sens; PLAYER.yaw -= e.movementX * s; PLAYER.pitch -= e.movementY * s * (SETTINGS.inv ? -1 : 1); PLAYER.pitch = clamp(PLAYER.pitch, -1.45, 1.45);
   }
   if (G.state === 'menu') { MENU.mx = e.clientX / innerWidth - 0.5; MENU.my = e.clientY / innerHeight - 0.5; }
 });
 canvas.addEventListener('click', (e) => {
-  if (G.state === 'play' && document.pointerLockElement !== canvas) canvas.requestPointerLock && canvas.requestPointerLock();
+  if (G.state === 'play' && document.pointerLockElement !== canvas) lockPointer();
   if (G.state === 'menu') menuClick(e);
 });
 document.addEventListener('pointerlockchange', () => { if (document.pointerLockElement !== canvas && G.state === 'play' && !G.ignoreUnlock) pauseGame(); G.ignoreUnlock = false; });
@@ -434,7 +435,7 @@ function showNote(L) {
   $('paper').querySelector('h5').textContent = L.title; $('paper').querySelector('.txt').innerHTML = L.text.replace('{FUSE}', W && W.fuseOrderText ? W.fuseOrderText : '1 → 2 → 3');
   $('note').classList.remove('hidden'); AUD.burst({ type: 'pink', f: 2000, dur: 0.35, vol: 0.25 });
 }
-function closeNote() { $('note').classList.add('hidden'); if (G.inMenuNote) { G.inMenuNote = false; G.state = 'menu'; return; } G.state = 'play'; canvas.requestPointerLock && canvas.requestPointerLock(); }
+function closeNote() { $('note').classList.add('hidden'); if (G.inMenuNote) { G.inMenuNote = false; G.state = 'menu'; return; } G.state = 'play'; lockPointer(); }
 $('note').addEventListener('click', closeNote);
 /* --- cuadro eléctrico --- */
 let fuseSeq = [];
@@ -450,7 +451,7 @@ function fuseFlip(i, el) {
   if (fuseSeq[fuseSeq.length - 1] !== W.fuseOrder[fuseSeq.length - 1]) { $('fuseMsg').textContent = '¡CHISPAS! Todo salta.'; AUD.burst({ type: 'white', f: 3000, dur: 0.5, vol: 0.6 }); FX.flash.value = 0.3; setTimeout(() => { fuseSeq = []; [...$('fuseRow').children].forEach((c) => c.classList.remove('on')); $('fuseMsg').textContent = 'Inténtalo otra vez.'; }, 700); return; }
   if (fuseSeq.length === 3) { $('fuseMsg').textContent = 'Algo zumba detrás de la pared…'; AUD.tone({ f: 60, type: 'sawtooth', dur: 1.5, vol: 0.1 }); setTimeout(() => { closeFuse(); W.onSecret(); }, 900); }
 }
-function closeFuse() { $('fuse').classList.add('hidden'); G.state = 'play'; canvas.requestPointerLock && canvas.requestPointerLock(); }
+function closeFuse() { $('fuse').classList.add('hidden'); G.state = 'play'; lockPointer(); }
 $('fuseClose').onclick = closeFuse;
 /* --- teclado --- */
 let kpEntry = '';
@@ -467,7 +468,7 @@ function kpPress(k) {
   } else if (kpEntry.length < 4) kpEntry += k;
   $('kpscreen').textContent = (kpEntry + '____').slice(0, 4);
 }
-function closeKeypad() { $('keypad').classList.add('hidden'); G.state = 'play'; canvas.requestPointerLock && canvas.requestPointerLock(); }
+function closeKeypad() { $('keypad').classList.add('hidden'); G.state = 'play'; lockPointer(); }
 $('kpclose').onclick = closeKeypad;
 addEventListener('keydown', (e) => { if (G.state === 'keypad') { if (/^Digit\d$/.test(e.code)) kpPress(e.code.slice(5)); if (e.code === 'Enter') kpPress('OK'); if (e.code === 'Backspace') kpPress('C'); if (e.code === 'Escape') closeKeypad(); } if (G.state === 'fuse' && e.code === 'Escape') closeFuse(); });
 
@@ -519,7 +520,7 @@ $('intro').addEventListener('click', () => {
   if (G.state !== 'intro') return;
   $('intro').classList.add('hidden'); HUD.classList.remove('hidden'); HUD.style.opacity = 1;
   W.ambience && W.ambience(); G.state = 'play'; staticFX(0.5, 250);
-  canvas.requestPointerLock && canvas.requestPointerLock();
+  lockPointer();
   if (LVI === 2) setTimeout(() => subtitle('Hay algo justo delante de mí…', 3), 800);
   if (LVI === 3) setTimeout(() => subtitle('Tengo que encontrar sus dibujos.', 3), 800);
 });
@@ -539,7 +540,7 @@ function winLevel() {
   }, 1300);
 }
 function pauseGame() { if (G.state !== 'play') return; G.state = 'pause'; $('pause').classList.remove('hidden'); if (document.pointerLockElement) { G.ignoreUnlock = true; document.exitPointerLock(); } if (AUD.ctx) AUD.ctx.suspend(); }
-function resumeGame() { $('pause').classList.add('hidden'); G.state = 'play'; if (AUD.ctx) AUD.ctx.resume(); canvas.requestPointerLock && canvas.requestPointerLock(); }
+function resumeGame() { $('pause').classList.add('hidden'); G.state = 'play'; if (AUD.ctx) AUD.ctx.resume(); lockPointer(); }
 $('pResume').onclick = resumeGame;
 $('pRestart').onclick = () => { $('pause').classList.add('hidden'); AUD.ctx && AUD.ctx.resume(); G.state = 'idle'; startLevel(LVI); };
 $('pMenu').onclick = () => { $('pause').classList.add('hidden'); AUD.ctx && AUD.ctx.resume(); toMenu(); };
